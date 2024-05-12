@@ -1,3 +1,6 @@
+** Super Resolution Convolutional Neural Network implementation using DIV2K and Set 14 datasets
+
+
 0) Create your own Pycharm project (or in Visual Studio) and install the packages defined above on each .py file. For pytorch better install cuda toolkit of your corresponding GPU cuda support and then install torch
 and torch vision from this link: https://pytorch.org/get-started/locally/.
 All the other libraries are easy to install from your IDE terminal.
