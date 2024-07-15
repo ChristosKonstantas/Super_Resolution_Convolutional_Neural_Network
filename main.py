@@ -208,9 +208,7 @@ if __name__ == '__main__':
         avg_losses = np.append(avg_losses, avg_loss)
         print(f'Epoch [{epoch + 1}/{num_epochs}], Average Loss: {avg_loss}')
 
-        # Validation step
-
-        # Validation step
+        # Validation
         model.eval()  # Set the model to evaluation mode
         with torch.inference_mode():  # Temporarily turn off gradient descent
             val_loss = 0.0
