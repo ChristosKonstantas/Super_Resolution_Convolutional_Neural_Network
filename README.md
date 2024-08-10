@@ -12,7 +12,7 @@ To execute the project successfully:
 * Download and install [cuda toolkit](https://developer.nvidia.com/cuda-toolkit) and the [cuda version](https://pytorch.org/get-started/locally/) that your NVIDIA-GPU supports.
 * Download the [Set 14 dataset](https://www.kaggle.com/datasets/ll01dm/set-5-14-super-resolution-dataset) .
 * Download the [DIV2K dataset](https://www.kaggle.com/datasets/joe1995/div2k-dataset) .
-* Change the directories in main.py, in test.py and in test_scripts.py to your corresponding local directories.
+* Change the paths in main.py, in test.py and in test_scripts.py to your corresponding local directories.
 * Execute main.py to train the model.
 * Execute test.py to see how good your training performed given a good image and test it versus its bicubic interpolated counterpart.
 * Execute test_scripts.py for single image super resolution (SISR).
