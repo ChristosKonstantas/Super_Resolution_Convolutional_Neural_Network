@@ -1,4 +1,4 @@
-** Super Resolution Convolutional Neural Network implementation using DIV2K and Set 14 datasets **
+**Super Resolution Convolutional Neural Network implementation using DIV2K and Set 14 datasets**
 
 This project is the implementation of the paper 'Image Super-Resolution Using Deep Convolutional Networks' that you can find in the below link:
 https://arxiv.org/pdf/1501.00092
