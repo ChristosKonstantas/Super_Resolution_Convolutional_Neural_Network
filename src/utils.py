@@ -12,11 +12,10 @@ from torchvision.datasets import ImageFolder
 from PIL import Image
 import matplotlib.pyplot as plt
 
-''' ---- This is a helper file. It contains functions that are used in main.py ----- '''
+''' ---- This is a utilities file. It contains functions that are used in main.py ----- '''
 
-
-# This function finds the minimum width and height of all images in a directory.
 def find_min_dimensions(train_dir, img1_extension):
+    # This function finds the minimum width and height of all images in a directory.
     # Initialize minimum width and height to a large number
     min_width = min_height = float('inf')
 

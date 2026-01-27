@@ -1,35 +1,72 @@
 import os
+import sys
+import argparse
 import random
 import torch
 from tqdm import tqdm
 from torch import nn, optim
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 from torchvision.transforms import RandomHorizontalFlip, RandomVerticalFlip, ToPILImage, ToTensor
-import torchvision.transforms as transforms
-from torchvision.transforms import InterpolationMode
-from torchvision.datasets import ImageFolder
 from torchvision.transforms.functional import to_pil_image, to_tensor
-import torchvision
-from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-from model import SRCNN, SRCNN2, SRCNN3
-import helper
-from helper import YChannelDataset, CbCrChannelDataset, PairedDataset
+
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, PROJECT_ROOT)
+# ---------------------------------------------------------------------------
+
+from src.model import SRCNN, SRCNN2, SRCNN3
+import utils
+from utils import YChannelDataset, CbCrChannelDataset, PairedDataset
 
 if __name__ == '__main__':
-    # ------------------------- 0.SETUP ---------------------------------------------------------------- #
-    # Define the directories for the training and evaluation datasets and get folder item extensions
 
-    train_dir = 'your_path_to_DIV2K_train_HR'
-    eval_dir = 'your_path_to_DIV2K_valid_HR'
-    first_image = 'your_path_to_DIV2K_train_HR\\0001.png'
-    img1_name, img1_extension = os.path.splitext(first_image)
+    # ------------------------- 0.SETUP ---------------------------------------------------------------- #
+    # CLI args
+    parser = argparse.ArgumentParser(description="Train/Eval SRCNN")
+    parser.add_argument("--train_dir", type=str, required=True, help="Path to DIV2K_train_HR")
+    parser.add_argument("--eval_dir", type=str, required=True, help="Path to DIV2K_valid_HR")
+    parser.add_argument(
+        "--first_image",
+        type=str,
+        default=None,
+        help="Optional: path to a sample image to infer extension (otherwise auto-detect from train_dir)",
+    )
+    parser.add_argument("--output_dir", type=str, required=True, help="Path to DIV2K_valid_HR")
+
+    args = parser.parse_args()
+
+
+    # Training and evaluation datasets directories
+    train_dir = args.train_dir
+    eval_dir = args.eval_dir
+    output_dir = args.output_dir
+
+    # Infer extension
+    if args.first_image is not None:
+        first_image = args.first_image
+        _, img1_extension = os.path.splitext(first_image)
+    else:
+        first_image = None
+        img1_extension = None
+        for subdir, _, files in os.walk(train_dir):
+            for file in files:
+                ext = os.path.splitext(file)[1]
+                if ext:
+                    first_image = os.path.join(subdir, file)
+                    img1_extension = ext
+                    break
+            if first_image is not None:
+                break
+        if first_image is None:
+            raise FileNotFoundError(f"No files with an extension found under train_dir: {train_dir}")
+
 
     # ---------------------------------------------------------------------------------------------------------- #
     # ---------------- 1.SETUP THE DATA -------------------------------------------------- #
     # ---------------------------------------------------------------------------------------------------------- #
-    min_width, min_height = helper.find_min_dimensions(train_dir, img1_extension)
+    min_width, min_height = utils.find_min_dimensions(train_dir, img1_extension)
 
     # ---------------------------------------------------------------------------------------------------------- #
     # -------------------------------- 2. PREPARING THE DATA ------------------------------------------------- #
@@ -41,7 +78,7 @@ if __name__ == '__main__':
     # Create and prepare datasets
     # Train and eval datasets contain the original images from the DIV2K dataset
     # Bicubic dataset contains the downscale and then bicubic interpolated images
-    train_dataset, eval_dataset, bicubic_dataset = helper.prepare_data(min_height, min_width, downscale_factor,
+    train_dataset, eval_dataset, bicubic_dataset = utils.prepare_data(min_height, min_width, downscale_factor,
                                                                        train_dir, eval_dir)
 
     # Create new datasets that convert RGB images to YCbCr and split into Y, Cb, Cr channels
@@ -151,8 +188,7 @@ if __name__ == '__main__':
     best_val_loss = float('inf')  # Initialize best_val_loss to infinity
     epochs_without_improvement = 0  # Number of epochs without improvement
 
-    # Specify the save directory
-    directory = 'your_path_to_save_directory'
+  
 
     # Initialize a list to hold the average loss per epoch
     avg_losses = []
@@ -166,7 +202,7 @@ if __name__ == '__main__':
     cb_channel_loader = DataLoader(cb_channel_dataset, batch_size=batch_size)
     cr_channel_loader = DataLoader(cr_channel_dataset, batch_size=batch_size)
 
-    helper.print_data(train_dataset, bicubic_dataset, eval_dataset, y_train_loader, y_val_loader,
+    utils.print_data(train_dataset, bicubic_dataset, eval_dataset, y_train_loader, y_val_loader,
                       batch_size)
 
     flag=0
@@ -232,7 +268,7 @@ if __name__ == '__main__':
             best_epoch = epoch + 1
         #    epochs_without_improvement = 0
         print('Saving model...')
-        torch.save(model.state_dict(), os.path.join(directory, f'model_{epoch+1}.pth'))
+        torch.save(model.state_dict(), os.path.join(output_dir, f'model_{epoch+1}.pth'))
 
       #  else:
        #     epochs_without_improvement += 1
